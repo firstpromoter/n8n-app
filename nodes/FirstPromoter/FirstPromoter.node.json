@@ -1,0 +1,19 @@
+{
+    "name": "n8n-nodes-firstpromoter",
+    "version": "0.1.0",
+    "codexVersion": "1.0",
+    "categories": ["Marketing, Sales"],
+    "resources": {
+        "credentialDocumentation": [
+            {
+                "url": "https://docs.firstpromoter.com/api-reference-v2/api-admin/authentication"
+            }
+        ],
+        "primaryDocumentation": [
+            {
+                "url": "https://docs.firstpromoter.com/api-reference-v2/api-admin/introduction"
+            }
+        ]
+    },
+    "alias": ["FirstPromoter"]
+}

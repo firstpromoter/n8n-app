@@ -1,0 +1,19 @@
+{
+    "name": "n8n-nodes-firstpromoter-legacy",
+    "version": "0.1.0",
+    "codexVersion": "1.0",
+    "categories": ["Marketing, Sales"],
+    "resources": {
+        "credentialDocumentation": [
+            {
+                "url": "https://docs.firstpromoter.com/api-reference-v1/authentication"
+            }
+        ],
+        "primaryDocumentation": [
+            {
+                "url": "https://docs.firstpromoter.com/api-reference-v1/introduction"
+            }
+        ]
+    },
+    "alias": ["FirstPromoter (Legacy)"]
+}

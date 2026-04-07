@@ -1,0 +1,67 @@
+{
+  "name": "n8n-nodes-firstpromoter-demo",
+  "version": "0.1.0",
+  "description": "An n8n community node for integrating with FirstPromoter APIs.",
+  "license": "MIT",
+  "homepage": "https://docs.firstpromoter.com/introduction",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n-community-node",
+    "n8n",
+    "workflow-automation",
+    "firstpromoter",
+    "firstpromoter node",
+    "firstpromoter legacy (v1) api",
+    "firstpromoter v2 api",
+    "firstpromoter webhooks"
+  ],
+  "main": "index.js",
+  "author": {
+    "name": "developer-prncfoli",
+    "email": "developer.prncfoli@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lastech-Solutions/n8n-nodes-firstpromoter-demo.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "release:skip-commits-since-tag": "npm exec -- release-it -n \"--git.requireBranch main\" --git.requireCleanWorkingDir --git.requireUpstream --no-git.requireCommits --git.commit --git.tag --git.push \"--git.changelog=npx auto-changelog --stdout --unreleased --commit-limit false -u --hide-credit\" --github.release \"--hooks.before:init=npm run lint && npm run build\" \"--hooks.after:bump=npx auto-changelog -p\" --npm.publish=false",
+    "prepublishOnly": "node -e \"if (process.env.RELEASE_MODE === 'true' || process.env.GITHUB_ACTIONS === 'true') process.exit(0); console.error('Publishing blocked: use GitHub Actions (push a v* tag), or run local publish with RELEASE_MODE=true (e.g. RELEASE_MODE=true npm publish). Do not use sudo npm.'); process.exit(1);\""
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/FirstPromoterLegacyApi.credentials.js",
+      "dist/credentials/FirstPromoterVersion2Api.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/FirstPromoter/FirstPromoter.node.js",
+      "dist/nodes/FirstPromoterLegacy/FirstPromoterLegacy.node.js",
+      "dist/nodes/FirstPromoterWebhooks/FirstPromoterWebhooks.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "^0.26.0",
+    "eslint": "^9.29.0",
+    "n8n-workflow": "*",
+    "prettier": "3.8.1",
+    "release-it": "^19.2.4",
+    "typescript": "6.0.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
