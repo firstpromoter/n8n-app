@@ -17,12 +17,12 @@
   ],
   "main": "index.js",
   "author": {
-    "name": "developer-prncfoli",
-    "email": "developer.prncfoli@gmail.com"
+    "name": "firstpromoter-prncfoli",
+    "email": "prince@firstpromoter.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Lastech-Solutions/n8n-nodes-firstpromoter-demo.git"
+    "url": "https://github.com/firstpromoter/n8n-app.git"
   },
   "scripts": {
     "build": "n8n-node build",
