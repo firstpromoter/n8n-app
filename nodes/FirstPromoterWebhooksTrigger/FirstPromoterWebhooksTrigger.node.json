@@ -2,7 +2,8 @@
 	"name": "FirstPromoter Webhooks Trigger",
 	"version": "0.1.0",
 	"codexVersion": "1.0",
-	"categories": ["Trigger"],
+	"categories": ["Sales & Marketing","Trigger"],
+	"subcategories": { "Sales & Marketing": ["Affiliate"], "Trigger": ["Webhooks"] },
 	"resources": {
 		"primaryDocumentation": [
 			{ "url": "https://docs.firstpromoter.com/webhooks/overview" }
