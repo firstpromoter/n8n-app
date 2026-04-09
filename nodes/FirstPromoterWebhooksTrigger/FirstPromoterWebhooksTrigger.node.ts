@@ -7,11 +7,11 @@ import {
 	NodeConnectionTypes
 } from 'n8n-workflow';
 
-export class FirstPromoterWebhooks implements INodeType {
+export class FirstPromoterWebhooksTrigger implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'FirstPromoter Webhooks',
+		displayName: 'FirstPromoter Webhooks Trigger',
 		icon: 'file:../../icons/firstpromoter.svg',
-		name: 'firstPromoterWebhooks',
+		name: 'firstPromoterWebhooksTrigger',
 		group: ['trigger'],
 		version: 1,
 		description:
@@ -24,7 +24,7 @@ export class FirstPromoterWebhooks implements INodeType {
 			},
 		},
 		usableAsTool: true,
-		defaults: { name: 'FirstPromoter Webhooks' },
+		defaults: { name: 'FirstPromoter Webhooks Trigger' },
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
 		webhooks: [
@@ -34,8 +34,6 @@ export class FirstPromoterWebhooks implements INodeType {
 				path: 'firstpromoter',
 				responseMode: 'onReceived',
 				responseData: 'noData',
-				description:
-					'The webhook URL to listen for FirstPromoter events. Go to FirstPromoter Settings > Integrations > Webhooks and add the webhook URL and select the campaign that you want to listen for the events.',
 			},
 		],
 		properties: [
@@ -57,6 +55,9 @@ export class FirstPromoterWebhooks implements INodeType {
 				default: [], 
 				description:
 					'Select the events that you want to listen for. Kindly ensure that you have configured the webhook URL for the campaign that you want to listen for the events in FirstPromoter. You can configure the webhook URL in FirstPromoter Settings > Integrations > Webhooks.',
+				hint: 
+				`<p>Kindly ensure that you have configured the webhook URL for the campaign that you want to listen for the events in FirstPromoter. You can configure the webhook URL in FirstPromoter <pre> Settings > Integrations > Webhooks</pre> section.</p>
+				`	
 			},
 			{
 				displayName: 'Fulfilment Pending Response Code',
@@ -155,6 +156,7 @@ export class FirstPromoterWebhooks implements INodeType {
 				const statusCode =
 					(this.getNodeParameter('fulfilmentPendingResponseCode', 200) as number) || 200;
 				this.getResponseObject().status(statusCode);
+				
 			}
 
 			return {

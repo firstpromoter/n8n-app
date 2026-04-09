@@ -47,7 +47,7 @@
     "nodes": [
       "dist/nodes/FirstPromoter/FirstPromoter.node.js",
       "dist/nodes/FirstPromoterLegacy/FirstPromoterLegacy.node.js",
-      "dist/nodes/FirstPromoterWebhooks/FirstPromoterWebhooks.node.js"
+      "dist/nodes/FirstPromoterWebhooks/FirstPromoterWebhooksTrigger.node.js"
     ]
   },
   "devDependencies": {

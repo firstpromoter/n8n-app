@@ -1,0 +1,15 @@
+{
+	"name": "FirstPromoter Webhooks Trigger",
+	"version": "0.1.0",
+	"codexVersion": "1.0",
+	"categories": ["Trigger"],
+	"resources": {
+		"primaryDocumentation": [
+			{ "url": "https://docs.firstpromoter.com/webhooks/overview" }
+		]
+	},
+	"nodeDocumentation": [
+		{ "url": "https://docs.firstpromoter.com/webhooks/overview" }
+	],
+	"alias": ["FirstPromoter Webhooks Trigger"]
+}

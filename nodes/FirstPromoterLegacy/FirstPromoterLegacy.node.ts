@@ -253,6 +253,9 @@ export class FirstPromoterLegacy implements INodeType {
 				},
 				description:
 					'The sale amount in cents. For zero-decimal currencies like JPY, amount should be whole values.',
+				hint: `The sale amount in cents. It's used to calculate commissions/rewards.<br/>
+For zero-decimal currencies like JPY, amount and mrr parameters should be sent as whole values.<br/>
+For other currencies, amount and mrr parameter values should be in cents, i.e., you will need to multiply the value by 100 before sending the request.`,
 			},
 			{
 				displayName: 'Event ID',
