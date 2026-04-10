@@ -25,6 +25,7 @@ export class FirstPromoterLegacyApi implements ICredentialType {
 				'The v1 (legacy) API key for the FirstPromoter. Get it from your FirstPromoter account Settings > Integrations > Manage API keys',
 			type: 'string',
 			default: '',
+			hint: 'The v1 (legacy) API key for the FirstPromoter. Get it from your FirstPromoter account Settings > Integrations > Manage API keys',
 		},
 	];
 

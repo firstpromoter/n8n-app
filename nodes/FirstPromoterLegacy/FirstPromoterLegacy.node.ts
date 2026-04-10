@@ -21,6 +21,7 @@ export class FirstPromoterLegacy implements INodeType {
 		group: ['transform'],
 		version: 1,
 		description: 'Interact with FirstPromoter (Legacy) v1 API',
+		subtitle: '={{$parameter["operation"]}}',
 		usableAsTool: true,
 		defaults: { name: 'FirstPromoter (Legacy) v1' },
 		inputs: [NodeConnectionTypes.Main],

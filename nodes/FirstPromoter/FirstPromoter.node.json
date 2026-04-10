@@ -1,9 +1,8 @@
 {
     "name": "n8n-nodes-firstpromoter",
-    "version": "0.1.0",
+    "nodeVersion": "1.0",
     "codexVersion": "1.0",
-    "categories": ["Marketing","Sales"],
-    "subcategories": { "Marketing": ["Affiliate"], "Sales": ["Affiliate"] },
+    "categories": ["Marketing & Content","Sales", "Productivity", "Analytics" ],
     "resources": {
         "credentialDocumentation": [
             {

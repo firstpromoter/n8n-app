@@ -15,7 +15,8 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		description:
-			'Listen for FirstPromoter webhook events (lead_signup, lead_cancelled, promoter_signs_up, promoter_accepted, reward_created, lead_becomes_referral, fulfilment_pending).',
+			'Listen for FirstPromoter webhook events/triggers (lead_signup, lead_cancelled, promoter_signs_up, promoter_accepted, reward_created, lead_becomes_referral, fulfilment_pending).',
+	    subtitle: "={{$parameter.events.length > 0 ? $parameter.events.join(', ') : 'No events selected'}}",	
 		usableAsTool: true,
 		defaults: { name: 'FirstPromoter Webhooks Trigger' },
 		inputs: [],

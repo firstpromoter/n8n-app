@@ -15,6 +15,8 @@ export class FirstPromoterVersion2Api implements ICredentialType {
 			headers: {
 				'ACCOUNT-ID': '={{$credentials.accountId}}',
 				Authorization: '=Bearer {{$credentials.apiKey}}',
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
 			},
 			qs: {
 				per_page: 1,
@@ -26,18 +28,20 @@ export class FirstPromoterVersion2Api implements ICredentialType {
 			displayName: 'Account ID',
 			name: 'accountId',
 			description:
-				'Your FirstPromoter account ID. Get it from your FirstPromoter account Settings > Integrations > Account id',
+				'Your FirstPromoter account ID. Get it from your FirstPromoter account Settings > Integrations > API integration section > Account id',
 			type: 'string',
 			default: '',
+			hint: 'The account ID for the FirstPromoter. Get it from your FirstPromoter account Settings > Integrations > API integration section > Account id',
 		},
 		{
 			displayName: 'V2 API Key',
 			name: 'apiKey',
 			typeOptions: { password: true },
 			description:
-				'Requires V2 API key for the FirstPromoter account. Get it from your FirstPromoter account Settings > Integrations > Manage API keys',
+				'Requires V2 API key for the FirstPromoter account. Get it from your FirstPromoter account Settings > Integrations > API integration section > API integration section > Manage API keys',
 			type: 'string',
 			default: '',
+			hint: 'The V2 API key for the FirstPromoter. Get it from your FirstPromoter account Settings > Integrations > API integration section > Manage API keys',
 		},
 	];
 
