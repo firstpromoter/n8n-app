@@ -250,8 +250,6 @@ Use **FirstPromoter v2 → Custom API** when you need an endpoint not covered by
 - **Node**: `>=22.22.0`
 
 ## Version history
-
-- 0.1.1
 - 0.1.0
 
 ## Resources
