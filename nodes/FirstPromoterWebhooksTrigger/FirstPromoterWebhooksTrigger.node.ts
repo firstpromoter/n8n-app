@@ -16,13 +16,6 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 		version: 1,
 		description:
 			'Listen for FirstPromoter webhook events (lead_signup, lead_cancelled, promoter_signs_up, promoter_accepted, reward_created, lead_becomes_referral, fulfilment_pending).',
-		codex: {
-			categories: ['Sales & Marketing'],
-			subcategories: { 'Sales & Marketing': ['Affiliate'] },
-			resources: {
-				primaryDocumentation: [{ url: 'https://docs.firstpromoter.com/webhooks/overview' }],
-			},
-		},
 		usableAsTool: true,
 		defaults: { name: 'FirstPromoter Webhooks Trigger' },
 		inputs: [],

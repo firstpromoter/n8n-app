@@ -1,8 +1,9 @@
 {
     "name": "n8n-nodes-firstpromoter-legacy",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "codexVersion": "1.0",
-    "categories": ["Marketing, Sales"],
+    "categories": ["Marketing","Sales"],
+    "subcategories": { "Marketing": ["Affiliate"], "Sales": ["Affiliate"] },
     "resources": {
         "credentialDocumentation": [
             {
@@ -15,5 +16,5 @@
             }
         ]
     },
-    "alias": ["FirstPromoter (Legacy)"]
+    "alias": ["FirstPromoter (Legacy) v1"]
 }

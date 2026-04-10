@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-firstpromoter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An n8n community node for integrating with FirstPromoter APIs.",
   "license": "MIT",
   "homepage": "https://docs.firstpromoter.com/introduction",
@@ -47,7 +47,7 @@
     "nodes": [
       "dist/nodes/FirstPromoter/FirstPromoter.node.js",
       "dist/nodes/FirstPromoterLegacy/FirstPromoterLegacy.node.js",
-      "dist/nodes/FirstPromoterWebhooks/FirstPromoterWebhooksTrigger.node.js"
+      "dist/nodes/FirstPromoterWebhooksTrigger/FirstPromoterWebhooksTrigger.node.js"
     ]
   },
   "devDependencies": {

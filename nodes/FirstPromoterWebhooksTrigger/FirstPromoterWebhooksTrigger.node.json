@@ -1,16 +1,13 @@
 {
-	"name": "FirstPromoter Webhooks Trigger",
-	"version": "0.1.0",
+	"name": "n8n-nodes-firstpromoter",
+	"version": "0.1.1",
 	"codexVersion": "1.0",
-	"categories": ["Sales & Marketing","Trigger"],
-	"subcategories": { "Sales & Marketing": ["Affiliate"], "Trigger": ["Webhooks"] },
+	"categories": ["Sales & Marketing"],
+	"subcategories": { "Sales & Marketing": ["Affiliate"]},
 	"resources": {
 		"primaryDocumentation": [
 			{ "url": "https://docs.firstpromoter.com/webhooks/overview" }
 		]
 	},
-	"nodeDocumentation": [
-		{ "url": "https://docs.firstpromoter.com/webhooks/overview" }
-	],
 	"alias": ["FirstPromoter Webhooks Trigger"]
 }
