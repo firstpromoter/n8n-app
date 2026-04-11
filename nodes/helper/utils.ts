@@ -1,4 +1,4 @@
-import { IDataObject } from "n8n-workflow";
+import { IDataObject } from 'n8n-workflow';
 
 /** Build custom_fields hash from node parameter. Keys from company custom fields, values String or Array of Strings. */
 export function buildCustomFields(param: IDataObject | undefined): IDataObject | undefined {
@@ -36,4 +36,13 @@ export function omitEmpty(obj: IDataObject): IDataObject {
 			return true;
 		}),
 	) as IDataObject;
+}
+
+export function parseJsonString(params: IDataObject | string): IDataObject {
+	if (typeof params === 'string') {
+		const normalized = params.trim().replace(/^\s*\{\s*\}\s*$/, '{}');
+		return (normalized === '{}' ? {} : JSON.parse(normalized)) as IDataObject;
+	} else {
+		return params ?? {};
+	}
 }

@@ -15,7 +15,7 @@ export class FirstPromoterLegacyApi implements ICredentialType {
 		dark: 'file:../icons/firstpromoter-dark.svg',
 	};
 	documentationUrl = 'https://docs.firstpromoter.com/api-reference-v1/authentication';
-  
+
 	properties: INodeProperties[] = [
 		{
 			displayName: 'V1 (Legacy) API Key',
@@ -36,8 +36,7 @@ export class FirstPromoterLegacyApi implements ICredentialType {
 				Accept: 'application/json',
 				'Content-Type': 'application/x-www-form-urlencoded',
 				'X-API-KEY': '={{$credentials.apiKey}}',
-			}
-
+			},
 		},
 	};
 
@@ -46,7 +45,7 @@ export class FirstPromoterLegacyApi implements ICredentialType {
 			method: 'GET' as IHttpRequestMethods,
 			url: 'https://firstpromoter.com/api/v1/promoters/list',
 			qs: {
-				per_page: 1, 
+				per_page: 1,
 			},
 		},
 	};

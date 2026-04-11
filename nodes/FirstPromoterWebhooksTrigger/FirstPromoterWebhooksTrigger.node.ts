@@ -4,7 +4,7 @@ import {
 	IWebhookFunctions,
 	IWebhookResponseData,
 	IDataObject,
-	NodeConnectionTypes
+	NodeConnectionTypes,
 } from 'n8n-workflow';
 
 export class FirstPromoterWebhooksTrigger implements INodeType {
@@ -12,13 +12,13 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 		displayName: 'FirstPromoter Webhooks Trigger',
 		icon: 'file:../../icons/firstpromoter.svg',
 		name: 'firstPromoterWebhooksTrigger',
-		group: ['trigger'],		
+		group: ['trigger'],
 		version: 1,
-		description:
-			'Listen for FirstPromoter webhook events/triggers (lead_signup, lead_cancelled, promoter_signs_up, promoter_accepted, reward_created, lead_becomes_referral, fulfilment_pending).',
-	    subtitle: "={{$parameter.events.length > 0 ? $parameter.events.join(', ') : 'No events selected'}}",	
+		description: 'Trigger on FirstPromoter webhook events',
+		subtitle:
+			"={{$parameter.events.length > 0 ? 'Triggers on ' + $parameter.events.join(', ') : 'No events selected'}}",
 		usableAsTool: true,
-		defaults: { name: 'FirstPromoter Webhooks Trigger' },
+		defaults: { name: 'Trigger' },
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
 		webhooks: [
@@ -26,9 +26,9 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 				name: 'default',
 				httpMethod: 'POST',
 				path: 'firstpromoter',
-				responseMode: 'onReceived',
+				responseMode: '={{$parameter["responseMode"]}}',
 				responseData: 'noData',
-				
+				nodeType: 'webhook',
 			},
 		],
 		properties: [
@@ -47,12 +47,11 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 					{ name: 'Promoter Signs Up', value: 'promoter_signs_up' },
 					{ name: 'Reward Created', value: 'reward_created' },
 				],
-				default: [], 
+				default: [],
 				description:
 					'Select the events that you want to listen for. Kindly ensure that you have configured the webhook URL for the campaign that you want to listen for the events in FirstPromoter. You can configure the webhook URL in FirstPromoter Settings > Integrations > Webhooks.',
-				hint: 
-				`<p>Kindly ensure that you have configured the webhook URL for the campaign that you want to listen for the events in FirstPromoter. You can configure the webhook URL in FirstPromoter <pre> Settings > Integrations > Webhooks</pre> section.</p>
-				`	
+				hint: `<p>Kindly ensure that you have configured the webhook URL for the campaign that you want to listen for the events in FirstPromoter. You can configure the webhook URL in FirstPromoter <pre> Settings > Integrations > Webhooks</pre> section.</p>
+				`,
 			},
 			{
 				displayName: 'Fulfilment Pending Response Code',
@@ -84,6 +83,23 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 				description:
 					'HTTP status to return for fulfilment_pending events. Use 200 when fulfilled, 2xx (except 200) to keep pending. See FirstPromoter docs.',
 			},
+			{
+				displayName: 'Response Mode',
+				name: 'responseMode',
+				type: 'options',
+				options: [
+					{
+						name: 'Respond Immediately',
+						value: 'responseNode',
+					},
+					{
+						name: 'Respond When Last Node Finishes',
+						value: 'lastNode',
+					},
+				],
+				default: 'responseNode',
+				description: 'When to respond to the webhook',
+			},
 		],
 	};
 
@@ -114,9 +130,9 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 				const raw = Array.isArray(eventsParam)
 					? eventsParam
 					: eventsParam &&
-							typeof eventsParam === 'object' &&
-							'values' in eventsParam &&
-							Array.isArray((eventsParam as { values: unknown[] }).values)
+						  typeof eventsParam === 'object' &&
+						  'values' in eventsParam &&
+						  Array.isArray((eventsParam as { values: unknown[] }).values)
 						? (eventsParam as { values: unknown[] }).values
 						: [];
 				selectedEvents = raw.filter((v): v is string => typeof v === 'string');
@@ -150,8 +166,10 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 			if (eventType === 'fulfilment_pending') {
 				const statusCode =
 					(this.getNodeParameter('fulfilmentPendingResponseCode', 200) as number) || 200;
-				this.getResponseObject().status(statusCode);
-				
+
+				if (statusCode === 200) {
+					this.getResponseObject().status(statusCode);
+				}
 			}
 
 			return {

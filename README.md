@@ -246,8 +246,8 @@ Use **FirstPromoter v2 → Custom API** when you need an endpoint not covered by
 
 ## Compatibility
 
-- **n8n**: `^1.0.0`
-- **Node**: `>=22.22.0`
+- **n8n**: `^2.15.1`
+- **node engine**: `>=22.22.0`
 
 ## Version history
 - 0.1.0

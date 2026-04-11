@@ -1,4 +1,11 @@
-import { ICredentialTestRequest, IHttpRequestMethods, ICredentialType, INodeProperties, Icon, IAuthenticate } from 'n8n-workflow';
+import {
+	ICredentialTestRequest,
+	IHttpRequestMethods,
+	ICredentialType,
+	INodeProperties,
+	Icon,
+	IAuthenticate,
+} from 'n8n-workflow';
 
 export class FirstPromoterVersion2Api implements ICredentialType {
 	name = 'firstPromoterVersion2Api';

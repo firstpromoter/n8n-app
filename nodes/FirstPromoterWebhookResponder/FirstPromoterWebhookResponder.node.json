@@ -1,5 +1,5 @@
 {
-	"name": "n8n-nodes-firstpromoter-webhooks-trigger",
+	"name": "n8n-nodes-firstpromoter-webhooks-responder",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Marketing & Content","Sales", "Productivity", "Analytics" ],
@@ -8,5 +8,5 @@
 			{ "url": "https://docs.firstpromoter.com/webhooks/overview" }
 		]
 	},
-	"alias": ["FirstPromoter Webhooks Trigger","Trigger on Webhook Events", "Webhook Trigger"]
+	"alias": [ "Respond to Webhook", "FirstPromoter Webhooks Reponder"]
 }

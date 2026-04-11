@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"strict": true,
-		"module": "node16",
+		"module": "Node16",
 		"moduleResolution": "node16",
 		"target": "es2019",
 		"lib": ["es2019", "es2020", "es2022.error"],
