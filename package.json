@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-firstpromoter",
+  "name": "@firstpromoter/n8n-nodes-firstpromoter",
   "version": "0.1.0",
   "description": "An n8n community node for integrating with FirstPromoter APIs.",
   "license": "MIT",
@@ -20,10 +20,15 @@
     "name": "firstpromoter-prncfoli",
     "email": "prince@firstpromoter.com"
   },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/firstpromoter/n8n-app.git"
   },
+  "bugs": {
+    "url": "https://github.com/firstpromoter/n8n-app/issues"
+  },
+  
   "scripts": {
     "build": "n8n-node build",
     "build:watch": "tsc --watch",

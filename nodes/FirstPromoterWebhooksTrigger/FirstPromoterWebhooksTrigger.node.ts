@@ -12,7 +12,7 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 		displayName: 'FirstPromoter Webhooks Trigger',
 		icon: 'file:../../icons/firstpromoter.svg',
 		name: 'firstPromoterWebhooksTrigger',
-		group: ['trigger'],
+		group: ['trigger'],		
 		version: 1,
 		description:
 			'Listen for FirstPromoter webhook events/triggers (lead_signup, lead_cancelled, promoter_signs_up, promoter_accepted, reward_created, lead_becomes_referral, fulfilment_pending).',
@@ -28,6 +28,7 @@ export class FirstPromoterWebhooksTrigger implements INodeType {
 				path: 'firstpromoter',
 				responseMode: 'onReceived',
 				responseData: 'noData',
+				
 			},
 		],
 		properties: [
