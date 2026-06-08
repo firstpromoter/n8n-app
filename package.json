@@ -1,6 +1,6 @@
 {
   "name": "@firstpromoter/n8n-nodes-firstpromoter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An n8n community node for integrating with FirstPromoter APIs.",
   "license": "MIT",
   "homepage": "https://docs.firstpromoter.com/introduction",
@@ -10,13 +10,9 @@
     "n8n",
     "workflow-automation",
     "firstpromoter",
-    "firstpromoter node",
-    "firstpromoter legacy (v1) api",
-    "firstpromoter v1 api",
-    "firstpromoter v2 api",
+    "firstpromoter v2",
     "firstpromoter webhooks",
-    "firstpromoter triggers",
-    "respond to webhook"
+    "firstpromoter trigger"
   ],
   "main": "index.js",
   "author": {
@@ -39,7 +35,7 @@
     "release": "n8n-node release",
     "release:skip-commits-since-tag": "npm exec -- release-it -n \"--git.requireBranch main\" --git.requireCleanWorkingDir --git.requireUpstream --no-git.requireCommits --git.commit --git.tag --git.push \"--git.changelog=npx auto-changelog --stdout --unreleased --commit-limit false -u --hide-credit\" --github.release \"--hooks.before:init=npm run lint && npm run build\" \"--hooks.after:bump=npx auto-changelog -p\" --npm.publish=false",
     "prepublishOnly": "node -e \"if (process.env.RELEASE_MODE === 'true' || process.env.GITHUB_ACTIONS === 'true') process.exit(0); console.error('Publishing blocked: use GitHub Actions (push a v* tag), or run local publish with RELEASE_MODE=true (e.g. RELEASE_MODE=true npm publish). Do not use sudo npm.'); process.exit(1);\"",
-    "start":"npm run build && N8N_CUSTOM_EXTENSIONS=$(pwd) npx n8n start"
+    "start": "npm run build && N8N_CUSTOM_EXTENSIONS=$(pwd)  npx n8n start"
   },
   "files": [
     "dist"
@@ -48,19 +44,16 @@
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [
-      "dist/credentials/FirstPromoterLegacyApi.credentials.js",
-      "dist/credentials/FirstPromoterVersion2Api.credentials.js"
+      "dist/credentials/FirstPromoterApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/FirstPromoter/FirstPromoter.node.js",
-      "dist/nodes/FirstPromoterLegacy/FirstPromoterLegacy.node.js",
-      "dist/nodes/FirstPromoterWebhooksTrigger/FirstPromoterWebhooksTrigger.node.js",
-      "dist/nodes/FirstPromoterWebhookResponder/FirstPromoterWebhookResponder.node.js"
+      "dist/nodes/FirstPromoter/FirstPromoterTrigger.node.js"
     ]
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
-    "@n8n/node-cli": "^0.26.0",
+    "@n8n/node-cli": "^0.31.0",
     "eslint": "^9.29.0",
     "n8n-workflow": "^2.13.1",
     "prettier": "3.8.1",

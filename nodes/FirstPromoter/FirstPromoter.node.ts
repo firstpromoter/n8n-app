@@ -1,31 +1,29 @@
 import {
-	IDataObject,
 	INodeType,
 	INodeTypeDescription,
 	IExecuteFunctions,
-	IHttpRequestMethods,
-	NodeOperationError,
-	NodeApiError,
-	JsonObject,
 	NodeConnectionTypes,
 } from 'n8n-workflow';
 
-import { buildCustomFields, omitEmpty, parseJsonString } from '../helper/utils';
+import { executeRequest } from './GeneralFunctions';
 
 export class FirstPromoter implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'FirstPromoter v2',
-		icon: 'file:../../icons/firstpromoter.svg',
+		displayName: 'FirstPromoter',
+		icon: {
+			light: 'file:../../icons/firstpromoter.svg',
+			dark: 'file:../../icons/firstpromoter.dark.svg',
+		},
 		name: 'firstPromoter',
 		group: ['transform'],
 		version: 1,
-		description: 'Interact with FirstPromoter V2 API',
+		description: 'Interact with the official FirstPromoter APIs',
 		subtitle: '={{$parameter["operation"]}}',
 		usableAsTool: true,
-		defaults: { name: 'FirstPromoter v2' },
+		defaults: { name: 'FirstPromoter' },
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
-		credentials: [{ name: 'firstPromoterVersion2Api', required: true }],
+		credentials: [{ name: 'firstPromoterApi', required: true }],
 		properties: [
 			{
 				displayName: 'Resource',
@@ -34,7 +32,7 @@ export class FirstPromoter implements INodeType {
 				noDataExpression: true,
 				options: [
 					{ name: 'Commission', value: 'commissions' },
-					{ name: 'Custom FirstPromoter API', value: 'custom' },
+					{ name: 'Custom API', value: 'api' },
 					{ name: 'Promo Code', value: 'promo codes' },
 					{ name: 'Promoter', value: 'promoters' },
 					{ name: 'Referral', value: 'referrals' },
@@ -191,15 +189,31 @@ export class FirstPromoter implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				displayOptions: {
-					show: { resource: ['custom'] },
+					show: { resource: ['api'] },
 				},
 				options: [
-					{ name: 'Make Firstromoter API Call', value: 'api', action: 'Make a custom v2 API call' },
+					{
+						name: 'Custom FirstPromoter API Call',
+						value: 'call',
+						action: 'Make a custom v2 API call',
+					},
 				],
-				default: 'api',
+				default: 'call',
 			},
-
-			// tracking parameters would go here...
+			// tracking parameters
+			{
+				displayName:
+					'For zero-decimal currencies like JPY, Amount and MRR parameters should be sent as whole values. For other currencies, Amount and MRR parameter values should be multipled by 100',
+				name: 'trackingNotice',
+				type: 'notice',
+				default: '',
+				displayOptions: {
+					show: {
+						resource: ['tracking'],
+						operation: ['sale', 'refund'],
+					},
+				},
+			},
 			{
 				displayName: 'Email',
 				name: 'email',
@@ -266,7 +280,7 @@ export class FirstPromoter implements INodeType {
 				},
 				description: 'IP Address of the user signing up',
 			},
-			// Additional parameters would go here...
+			// Additional parameters .
 			{
 				displayName: 'Created At',
 				name: 'created_at',
@@ -294,12 +308,16 @@ export class FirstPromoter implements INodeType {
 				description: 'Whether to skip sending email notification',
 			},
 
-			// additional sale tracking parameters would go here...
+			// additional sale tracking parameters
 
 			{
 				displayName: 'Amount',
 				name: 'amount',
-				type: 'string',
+				type: 'number',
+				typeOptions: {
+					minValue: 0,
+					maxValue: 1000000000,
+				},
 				default: '',
 				required: true,
 				displayOptions: {
@@ -310,7 +328,6 @@ export class FirstPromoter implements INodeType {
 				},
 				description:
 					'The sale amount in cents. For zero-decimal currencies like JPY, amount should be whole values.',
-				hint: `For zero-decimal currencies like JPY, amount and mrr parameters should be sent as whole values.<br>For other currencies, amount and mrr parameter values should be in cents, i.e., you will need to multiply the value by <b100 before sending the request`,
 			},
 			{
 				displayName: 'Event ID',
@@ -354,7 +371,10 @@ export class FirstPromoter implements INodeType {
 			{
 				displayName: 'Quantity',
 				name: 'quantity',
-				type: 'string',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+				},
 				default: '',
 				displayOptions: {
 					show: {
@@ -404,7 +424,7 @@ export class FirstPromoter implements INodeType {
 					},
 				},
 				description:
-					'The event ID of the sale for which the refund is processed. Should match the event_id from the sales tracking API call. Required for accurate tracking of multiple products or changing commission levels.',
+					'The event ID of the sale for which the refund is processed. Should match the event_id from the sales tracking API call. Required for accurate tracking of multiple products or changing commission levels',
 			},
 			{
 				displayName: 'TID',
@@ -420,7 +440,7 @@ export class FirstPromoter implements INodeType {
 				description: "Visitor's Tracking ID (tid). The _fprom_tid cookie value.",
 			},
 			{
-				displayName: "Ref ID (Promoter's Referral ID)",
+				displayName: 'Promoter Refferal ID',
 				name: 'ref_id',
 				type: 'string',
 				default: '',
@@ -430,7 +450,7 @@ export class FirstPromoter implements INodeType {
 						operation: ['sale'],
 					},
 				},
-				description: "Promoter's Referral ID (ref_id). The _fprom_ref_id cookie value.",
+				description: "Promoter's referral link token or ID (ref_id). The _fprom_ref cookie value.",
 			},
 			{
 				displayName: 'Skip Email Notification',
@@ -446,8 +466,8 @@ export class FirstPromoter implements INodeType {
 				description: 'Whether to skip sending email notification',
 			},
 
-			// Referral parameters would go here...
-			// get referral details parameters would go here...
+			// Referral parameters
+			// get referral details parameters
 			{
 				displayName: 'Find by Attribute',
 				name: 'findReferralBy',
@@ -460,7 +480,7 @@ export class FirstPromoter implements INodeType {
 					{ name: 'UID', value: 'uid' },
 					{ name: 'Username', value: 'username' },
 				],
-				default: 'id', // 'id', 'uid', 'email', 'username'
+				default: 'id',
 				description: 'Find a referral by its ID, Email, or Username',
 				displayOptions: {
 					show: {
@@ -484,7 +504,7 @@ export class FirstPromoter implements INodeType {
 					'The value of the attribute to find the referral by. For example, the ID of the referral, UID of the referral, email of the referral, or username of the referral.',
 			},
 
-			// update referral parameters would go here...
+			// update referral parameters
 			{
 				displayName: 'Find by Attribute',
 				name: 'findReferralBy',
@@ -550,7 +570,7 @@ export class FirstPromoter implements INodeType {
 					'Percentage value of the split between 0 and 100. Note: Reach out to us on support if you need this. It needs to be enabled before you can use it.',
 			},
 			{
-				displayName: 'Promoter Campaign ID to split details for',
+				displayName: 'Promoter Campaign ID to Split Details For',
 				name: 'splitDetailsPromoterCampaignId',
 				type: 'number',
 				default: '',
@@ -563,7 +583,7 @@ export class FirstPromoter implements INodeType {
 				description:
 					'Promoter Campaign ID on which you want the split. Note: Reach out to us on support if you need this. It needs to be enabled before you can use it.',
 			},
-			// delete referrals parameters would go here...
+			// delete referrals parameters
 			{
 				displayName: 'IDs',
 				name: 'ids',
@@ -582,7 +602,7 @@ export class FirstPromoter implements INodeType {
 				description:
 					'ID of the referrals to delete. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
-			// move referrals to promoter parameters would go here...
+			// move referrals to promoter parameters
 			{
 				displayName: 'Promoter Campaign ID',
 				name: 'promoterCampaignId',
@@ -617,9 +637,9 @@ export class FirstPromoter implements INodeType {
 					'IDs of the referrals to move to a promoter. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
 
-			// Promoter parameters would go here...
+			// Promoter parameters
 
-			// get promoter details parameters would go here...
+			// get promoter details parameters
 			{
 				displayName: 'Find by Attribute',
 				name: 'findPromoterBy',
@@ -633,7 +653,7 @@ export class FirstPromoter implements INodeType {
 					{ name: 'Promo Code', value: 'promo_code' },
 					{ name: 'Referral Token', value: 'ref_token' },
 				],
-				default: 'id', // 'auth_token', 'email', 'id', 'promo_code', 'ref_token'
+				default: 'id',
 				description: 'Find a promoter by its Auth Token, Email, ID, Promo Code, or Referral Token',
 				displayOptions: {
 					show: {
@@ -657,7 +677,7 @@ export class FirstPromoter implements INodeType {
 					'The value of the attribute to find the promoter by. For example, the Auth Token, Email, ID, Promo Code, or Referral Token of the promoter.',
 			},
 
-			// update promoter parameters would go here...
+			// update promoter parameters
 			{
 				displayName: 'Find by Attribute',
 				name: 'findPromoterBy',
@@ -671,7 +691,7 @@ export class FirstPromoter implements INodeType {
 					{ name: 'Promo Code', value: 'promo_code' },
 					{ name: 'Referral Token', value: 'ref_token' },
 				],
-				default: 'id', // 'auth_token', 'email', 'id', 'promo_code', 'ref_token'
+				default: 'id',
 				description: 'Find a promoter by its Auth Token, Email, ID, Promo Code, or Referral Token',
 				displayOptions: {
 					show: {
@@ -695,7 +715,7 @@ export class FirstPromoter implements INodeType {
 					'The value of the attribute to find the promoter by. For example, the Auth Token, Email, ID, Promo Code, or Referral Token of the promoter.',
 			},
 
-			// update promoter parameters would go here...
+			// update promoter parameters
 
 			{
 				displayName: 'First Name',
@@ -711,7 +731,7 @@ export class FirstPromoter implements INodeType {
 				description: 'First name of the promoter',
 			},
 
-			// create promoter parameters would go here...
+			// create promoter parameters
 
 			{
 				displayName: 'Email',
@@ -1104,11 +1124,14 @@ export class FirstPromoter implements INodeType {
 				],
 			},
 
-			// Get promoters list parameters would go here...
+			// Get promoters list parameters
 			{
 				displayName: 'Page',
 				name: 'page',
 				type: 'number',
+				typeOptions: {
+					minValue: 1,
+				},
 				default: 1,
 				displayOptions: {
 					show: {
@@ -1122,6 +1145,10 @@ export class FirstPromoter implements INodeType {
 				name: 'perPage',
 				type: 'number',
 				default: 20,
+				typeOptions: {
+					minValue: 1,
+					maxValue: 100,
+				},
 				displayOptions: {
 					show: {
 						resource: ['commissions'],
@@ -1135,6 +1162,10 @@ export class FirstPromoter implements INodeType {
 				name: 'perPage',
 				type: 'number',
 				default: 20,
+				typeOptions: {
+					minValue: 1,
+					maxValue: 100,
+				},
 				displayOptions: {
 					show: {
 						resource: ['promoters'],
@@ -1148,6 +1179,10 @@ export class FirstPromoter implements INodeType {
 				name: 'perPage',
 				type: 'number',
 				default: 20,
+				typeOptions: {
+					minValue: 1,
+					maxValue: 100,
+				},
 				displayOptions: {
 					show: {
 						resource: ['referrals'],
@@ -1188,7 +1223,7 @@ export class FirstPromoter implements INodeType {
 					'IDs of the promoters to assign a parent promoter. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
 
-			// move promoters to campaign parameters would go here...
+			// move promoters to campaign parameters
 			{
 				displayName: 'From Campaign ID',
 				name: 'fromCampaignId',
@@ -1264,7 +1299,7 @@ export class FirstPromoter implements INodeType {
 				description: 'Whether to send drip emails to the promoter',
 			},
 
-			// add promoters to campaign parameters would go here...
+			// add promoters to campaign parameters
 			{
 				displayName: 'Campaign ID',
 				name: 'campaignId',
@@ -1312,7 +1347,7 @@ export class FirstPromoter implements INodeType {
 				description: 'Whether to send drip emails to the promoter',
 			},
 
-			// accept promoters parameters would go here...
+			// accept promoters parameters
 			{
 				displayName: 'Campaign ID',
 				name: 'campaignId',
@@ -1347,7 +1382,7 @@ export class FirstPromoter implements INodeType {
 					'IDs of the promoters to accept. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
 
-			// reject promoters parameters would go here...
+			// reject promoters parameters
 			{
 				displayName: 'Campaign ID',
 				name: 'campaignId',
@@ -1382,7 +1417,7 @@ export class FirstPromoter implements INodeType {
 					'IDs of the promoters to reject. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
 
-			// block promoters parameters would go here...
+			// block promoters parameters
 			{
 				displayName: 'Campaign ID',
 				name: 'campaignId',
@@ -1417,7 +1452,7 @@ export class FirstPromoter implements INodeType {
 					'IDs of the promoters to block. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
 
-			// archive promoters parameters would go here...
+			// archive promoters parameters
 			{
 				displayName: 'IDs',
 				name: 'ids',
@@ -1437,7 +1472,7 @@ export class FirstPromoter implements INodeType {
 					'IDs of the promoters to archive. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
 
-			// Restore promoters parameters would go here...
+			// Restore promoters parameters
 			{
 				displayName: 'IDs',
 				name: 'ids',
@@ -1457,7 +1492,7 @@ export class FirstPromoter implements INodeType {
 					'IDs of the promoters to restore. If there are more than `5` IDs, the action will be processed asynchronously. The available statuses are `pending`, `in_progress`, `completed`, `failed` and `stopped`',
 			},
 
-			// Promo Codes parameters would go here...
+			// Promo Codes parameters
 			{
 				displayName: 'Filter By Promoter Campaign ID',
 				name: 'filterByPromoterCampaignId',
@@ -1472,7 +1507,7 @@ export class FirstPromoter implements INodeType {
 				description: 'Filters promo codes by promoter campaign ID',
 			},
 
-			// Archive Promo Code By ID parameters would go here...
+			// Archive Promo Code By ID parameters
 
 			{
 				displayName: 'Promo Code ID',
@@ -1493,7 +1528,7 @@ export class FirstPromoter implements INodeType {
 				description: 'ID of the promo code',
 			},
 
-			// Create Promo Code (Stripe Only) parameters would go here...
+			// Create Promo Code (Stripe Only) parameters
 			{
 				displayName: 'Code',
 				name: 'promoCode',
@@ -1578,19 +1613,27 @@ export class FirstPromoter implements INodeType {
 				description: 'Details of the promo code',
 			},
 
-			// Custom API Call parameters would go here...
+			// Custom API Call parameters
+			{
+				displayName:
+					'No need to add the base URL(https://api.firstpromoter.com/v2). You can use only the URL path of the endpoint. For example: "/company/promoters". See the <a href="https://docs.firstpromoter.com/api-reference-v2/api-admin/introduction">FirstPromoter v2 API documentation</a> for all avaliable endpoints.',
+				name: 'notice',
+				type: 'notice',
+				default: '',
+				displayOptions: {
+					show: { resource: ['api'], operation: ['call'] },
+				},
+			},
 			{
 				displayName: 'URL Path',
 				name: 'urlPath',
 				type: 'string',
 				default: '',
 				displayOptions: {
-					show: { resource: ['custom'], operation: ['api'] },
+					show: { resource: ['api'], operation: ['call'] },
 				},
 				description:
-					"The URL path of the endpoint. For example: `/company/promoters`. You don't need to add the base URL(https://api.firstpromoter.com/v2). You can find the available paths in the firstpromoter v2 api documentation.",
-
-				hint: `The URL path of the endpoint. For example: <b>/company/promoters</b> <br>You don't need to add the base URL(<b>https://api.firstpromoter.com/v2</b>). You can find the available paths in the firstpromoter v2 api documentation.`,
+					'For example: `/company/promoters`. No need to add the base URL(https://api.firstpromoter.com/v2).',
 				placeholder: '/company/promoters',
 			},
 			{
@@ -1606,9 +1649,18 @@ export class FirstPromoter implements INodeType {
 					{ name: 'PUT', value: 'PUT' },
 				],
 				displayOptions: {
-					show: { resource: ['custom'], operation: ['api'] },
+					show: { resource: ['api'], operation: ['call'] },
 				},
 				description: 'Request Method of the custom API call',
+			},
+			{
+				displayName: 'Send Body',
+				name: 'sendBodyParameters',
+				type: 'boolean',
+				default: false,
+				displayOptions: {
+					show: { resource: ['api'], operation: ['call'] },
+				},
 			},
 			{
 				displayName: 'Body',
@@ -1616,29 +1668,41 @@ export class FirstPromoter implements INodeType {
 				type: 'json',
 				default: {},
 				displayOptions: {
-					show: { resource: ['custom'], operation: ['api'] },
+					show: { resource: ['api'], operation: ['call'], sendBodyParameters: [true] },
+					hide: { sendBodyParameters: [false] },
 				},
-				description: 'Body of the custom API call',
+				description: 'Body of the custom API call. It must be a valid JSON object.',
 			},
 			{
-				displayName: 'Query String Parameters',
-				name: 'queryStringParameters',
+				displayName: 'Send Query Parameters',
+				name: 'sendQueryParameters',
+				type: 'boolean',
+				default: false,
+				displayOptions: {
+					show: { resource: ['api'], operation: ['call'] },
+				},
+			},
+			{
+				displayName: 'Query Parameters',
+				name: 'queryParameterCollection',
 				type: 'fixedCollection',
 				typeOptions: {
 					multipleValues: true,
 				},
 				default: {},
-				placeholder: 'Add Query String Parameter',
+				placeholder: 'Add Query Parameter',
 				displayOptions: {
 					show: {
-						resource: ['custom'],
-						operation: ['api'],
+						resource: ['api'],
+						operation: ['call'],
+						sendQueryParameters: [true],
 					},
+					hide: { sendQueryParameters: [false] },
 				},
-				description: 'Query string parameters of the custom API call',
+				description: 'Query parameters of the custom API call',
 				options: [
 					{
-						displayName: 'QueryParameters',
+						displayName: 'Query Parameter',
 						name: 'queryParameters',
 						values: [
 							{
@@ -1653,9 +1717,6 @@ export class FirstPromoter implements INodeType {
 								displayName: 'Value',
 								name: 'parameterValue',
 								type: 'string',
-								// typeOptions: {
-								//   multipleValues: true,
-								// },
 								default: '',
 								placeholder: 'Add value',
 								description: 'Value for this parameter name',
@@ -1665,24 +1726,35 @@ export class FirstPromoter implements INodeType {
 				],
 			},
 			{
-				displayName: 'Headers Parameters',
-				name: 'headersParams',
+				displayName: 'Send Headers',
+				name: 'sendHeaderParameters',
+				type: 'boolean',
+				default: false,
+				displayOptions: {
+					show: { resource: ['api'], operation: ['call'] },
+				},
+			},
+			{
+				displayName: 'Headers',
+				name: 'headerCollection',
 				type: 'fixedCollection',
 				typeOptions: {
 					multipleValues: true,
 				},
 				default: {},
-				placeholder: 'Add Header Parameter',
+				placeholder: 'Add Header',
 				displayOptions: {
 					show: {
-						resource: ['custom'],
-						operation: ['api'],
+						resource: ['api'],
+						operation: ['call'],
+						sendHeaderParameters: [true],
 					},
+					hide: { sendHeaderParameters: [false] },
 				},
 				description: 'Header parameters of the custom API call',
 				options: [
 					{
-						displayName: 'HeaderParameters',
+						displayName: 'Header Parameter',
 						name: 'headerParameters',
 						values: [
 							{
@@ -1697,9 +1769,6 @@ export class FirstPromoter implements INodeType {
 								displayName: 'Value',
 								name: 'parameterValue',
 								type: 'string',
-								// typeOptions: {
-								//   multipleValues: true,
-								// },
 								default: '',
 								placeholder: 'header value',
 								description: 'Value for this header parameter name',
@@ -1999,700 +2068,6 @@ export class FirstPromoter implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions) {
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
-
-		let endpoint = '';
-		let method: IHttpRequestMethods = 'GET';
-		let body: IDataObject = {};
-		let qs: IDataObject = {};
-		const headers: IDataObject = {};
-
-		if (resource === 'referrals') {
-			switch (operation) {
-				case 'list referrals':
-					endpoint = '/company/referrals';
-					method = 'GET';
-					qs = {
-						page: this.getNodeParameter('page', 0, 1),
-						per_page: this.getNodeParameter('perPage', 0, 20),
-					};
-					break;
-				case 'get referral':
-					{
-						const findBy = this.getNodeParameter('findReferralBy', 0) as string;
-						const attributeValue = this.getNodeParameter('attributeValue', 0) as string;
-						if (findBy === 'id') {
-							endpoint = `/company/referrals/${attributeValue}`;
-						} else {
-							endpoint = `/company/referrals/${attributeValue}?find_by=${findBy}`;
-						}
-					}
-					method = 'GET';
-					break;
-
-				case 'update referrals':
-					{
-						const findBy = this.getNodeParameter('findReferralBy', 0) as string;
-						const attributeValue = this.getNodeParameter('attributeValue', 0) as string;
-						if (findBy === 'uid') {
-							endpoint = `/company/referrals/${attributeValue}?find_by=${findBy}`;
-						} else if (findBy === 'email') {
-							endpoint = `/company/referrals/${attributeValue}?find_by=${findBy}`;
-						} else if (findBy === 'username') {
-							endpoint = `/company/referrals/${attributeValue}?find_by=${findBy}`;
-						} else {
-							endpoint = `/company/referrals/${attributeValue}`;
-						}
-					}
-					method = 'PUT';
-					body = {
-						promoter_campaign_id: this.getNodeParameter('promoterCampaignId', 0),
-						'split_details[percentage]': this.getNodeParameter('splitDetailsPercentage', 0),
-						'split_details[promoter_campaign_id]': this.getNodeParameter(
-							'splitDetailsPromoterCampaignId',
-							0,
-						),
-					};
-					break;
-
-				case 'move':
-					{
-						const idsParam = this.getNodeParameter('referralIds', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/referrals/move_to_promoter';
-						method = 'POST';
-						body = {
-							promoter_campaign_id: this.getNodeParameter('promoterCampaignId', 0),
-							ids: ids,
-						};
-					}
-					break;
-
-				case 'delete referrals':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-
-						body = { ids };
-						endpoint = `/company/referrals`;
-						method = 'DELETE';
-					}
-					break;
-			}
-		} else if (resource === 'tracking') {
-			if (['sale', 'refund', 'cancellation'].includes(operation)) {
-				const email = (this.getNodeParameter('email', 0) as string)?.trim() || '';
-				const uid = (this.getNodeParameter('uid', 0) as string)?.trim() || '';
-				if (!email && !uid) {
-					throw new NodeOperationError(
-						this.getNode(),
-						`When tracking a ${operation}, either Email or UID is required.`,
-					);
-				}
-			}
-			switch (operation) {
-				case 'signup':
-					endpoint = '/track/signup';
-					method = 'POST';
-					body = {
-						email: this.getNodeParameter('email', 0),
-						uid: this.getNodeParameter('uid', 0),
-						tid: this.getNodeParameter('tid', 0),
-						ref_id: this.getNodeParameter('ref_id', 0),
-						ip: this.getNodeParameter('ip', 0),
-						created_at: this.getNodeParameter('created_at', 0),
-						skip_email_notification: this.getNodeParameter('skip_email_notification', 0),
-					};
-					break;
-				case 'sale':
-					endpoint = '/track/sale';
-					method = 'POST';
-					body = {
-						email: this.getNodeParameter('email', 0),
-						uid: this.getNodeParameter('uid', 0),
-						amount: this.getNodeParameter('amount', 0),
-						event_id: this.getNodeParameter('event_id', 0),
-						currency: this.getNodeParameter('currency', 0),
-						tid: this.getNodeParameter('tid', 0),
-						ref_id: this.getNodeParameter('ref_id', 0),
-						quantity: this.getNodeParameter('quantity', 0),
-						promo_code: this.getNodeParameter('promo_code', 0),
-						plan: this.getNodeParameter('plan', 0),
-						mrr: this.getNodeParameter('mrr', 0),
-						skip_email_notification: this.getNodeParameter('skip_email_notification', 0),
-					};
-					break;
-				case 'refund':
-					endpoint = '/track/refund';
-					method = 'POST';
-					body = {
-						email: this.getNodeParameter('email', 0),
-						uid: this.getNodeParameter('uid', 0),
-						amount: this.getNodeParameter('amount', 0),
-						event_id: this.getNodeParameter('event_id', 0),
-						currency: this.getNodeParameter('currency', 0),
-						sale_event_id: this.getNodeParameter('sale_event_id', 0),
-						quantity: this.getNodeParameter('quantity', 0),
-					};
-					break;
-				case 'cancellation':
-					endpoint = '/track/cancellation';
-					method = 'POST';
-					body = {
-						email: this.getNodeParameter('email', 0),
-						uid: this.getNodeParameter('uid', 0),
-					};
-					break;
-			}
-		} else if (resource === 'commissions') {
-			switch (operation) {
-				case 'list commissions':
-					{
-						qs = {
-							q: this.getNodeParameter('searchByAttributeValue', 0),
-							page: this.getNodeParameter('page', 0, 1),
-							per_page: this.getNodeParameter('perPage', 0, 25),
-						};
-					}
-					endpoint = '/company/commissions';
-					method = 'GET';
-
-					break;
-				case 'create commission':
-					endpoint = '/company/commissions';
-					method = 'POST';
-					body = {
-						commission_type: 'sale',
-						referral_id: this.getNodeParameter('referralId', 0),
-						sale_amount: this.getNodeParameter('saleAmount', 0),
-						plan_id: this.getNodeParameter('planId', 0),
-						event_id: this.getNodeParameter('eventId', 0),
-						event_date: this.getNodeParameter('eventDate', 0),
-						internal_note: this.getNodeParameter('internalNote', 0),
-						external_note: this.getNodeParameter('externalNote', 0),
-						notify_promoter: this.getNodeParameter('notifyPromoter', 0),
-						billing_period: this.getNodeParameter('billingPeriod', 0),
-					};
-					break;
-				case 'create custom commission':
-					endpoint = '/company/commissions';
-					method = 'POST';
-					body = {
-						commission_type: 'custom',
-						amount: this.getNodeParameter('amount', 0),
-						promoter_campaign_id: this.getNodeParameter('promoterCampaignId', 0),
-						unit: this.getNodeParameter('unit', 0),
-						event_date: this.getNodeParameter('eventDate', 0),
-						internal_note: this.getNodeParameter('internalNote', 0),
-						external_note: this.getNodeParameter('externalNote', 0),
-						notify_promoter: this.getNodeParameter('notifyPromoter', 0),
-					};
-					break;
-
-				case 'update commission':
-					endpoint = `/company/commissions/${this.getNodeParameter('commissionId', 0)}`;
-					method = 'PUT';
-					body = {
-						internal_note: this.getNodeParameter('commissionInternalNote', 0),
-						external_note: this.getNodeParameter('commissionExternalNote', 0),
-					};
-					break;
-				case 'approve commissions':
-					endpoint = '/company/commissions/approve';
-					method = 'POST';
-					{
-						const idsParam = this.getNodeParameter('commissionIDs', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						body = { ids };
-					}
-					break;
-				case 'deny commissions':
-					endpoint = '/company/commissions/deny';
-					method = 'POST';
-					{
-						const idsParam = this.getNodeParameter('commissionIDs', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						body = { ids };
-					}
-					break;
-				case 'mark commission fulfilled':
-					endpoint = '/company/commissions/mark_fulfilled';
-					method = 'POST';
-					{
-						const idsParam = this.getNodeParameter('commissionIDs', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						body = { ids };
-					}
-					break;
-				case 'mark commission unfulfilled':
-					endpoint = '/company/commissions/mark_unfulfilled';
-					method = 'POST';
-					{
-						const idsParam = this.getNodeParameter('commissionIDs', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						body = { ids };
-					}
-					break;
-			}
-		} else if (resource === 'promoters') {
-			switch (operation) {
-				case 'list promoters':
-					endpoint = '/company/promoters';
-					method = 'GET';
-					qs = {
-						page: this.getNodeParameter('page', 0, 1),
-						per_page: this.getNodeParameter('perPage', 0, 20),
-					};
-					break;
-				case 'get promoter':
-					{
-						const findBy = this.getNodeParameter('findPromoterBy', 0) as string;
-						const attributeValue = this.getNodeParameter('attributeValue', 0) as string;
-						if (findBy === 'id') {
-							endpoint = `/company/promoters/${attributeValue}`;
-						} else {
-							endpoint = `/company/promoters/${attributeValue}?find_by=${findBy}`;
-						}
-					}
-					method = 'GET';
-					break;
-				case 'create promoter':
-					{
-						endpoint = '/company/promoters';
-						method = 'POST';
-
-						body = {
-							email: this.getNodeParameter('promoterEmail', 0),
-							cust_id: this.getNodeParameter('promoterCustId', 0),
-							profile: {
-								first_name: this.getNodeParameter('promoterFirstName', 0),
-								last_name: this.getNodeParameter('promoterLastName', 0),
-								website: this.getNodeParameter('promoterWebsite', 0),
-								company_name: this.getNodeParameter('promoterCompanyName', 0),
-								company_number: this.getNodeParameter('promoterCompanyNumber', 0),
-								phone_number: this.getNodeParameter('promoterPhoneNumber', 0),
-								vat_id: this.getNodeParameter('promoterVatId', 0),
-								country: this.getNodeParameter('promoterCountry', 0),
-								address: this.getNodeParameter('promoterAddress', 0),
-								avatar: this.getNodeParameter('promoterAvatar', 0),
-								w8_form_url: this.getNodeParameter('promoterW8FormUrl', 0),
-								w9_form_url: this.getNodeParameter('promoterW9FormUrl', 0),
-								description: this.getNodeParameter('promoterDescription', 0),
-								instagram_url: this.getNodeParameter('promoterInstagramUrl', 0),
-								youtube_url: this.getNodeParameter('promoterYouTubeUrl', 0),
-								linkedin_url: this.getNodeParameter('promoterLinkedinUrl', 0),
-								facebook_url: this.getNodeParameter('promoterFacebookUrl', 0),
-								twitter_url: this.getNodeParameter('promoterTwitterUrl', 0),
-								twitch_url: this.getNodeParameter('promoterTwitchUrl', 0),
-								tiktok_url: this.getNodeParameter('promoterTiktokUrl', 0),
-							},
-							initial_campaign_id: this.getNodeParameter('promoterInitialCampaignId', 0),
-							drip_emails: this.getNodeParameter('promoterDripEmails', 0),
-						};
-					}
-					break;
-				case 'update promoter':
-					{
-						endpoint = `/company/promoters/${this.getNodeParameter('attributeValue', 0)}`;
-						method = 'PUT';
-						const customFieldsUpdate = buildCustomFields(
-							this.getNodeParameter('promoterCustomFields', 0, {}) as IDataObject,
-						);
-						body = {
-							cust_id: this.getNodeParameter('promoterCustId', 0),
-							find_by: this.getNodeParameter('findPromoterBy', 0),
-							profile: {
-								first_name: this.getNodeParameter('promoterFirstName', 0),
-								last_name: this.getNodeParameter('promoterLastName', 0),
-								website: this.getNodeParameter('promoterWebsite', 0),
-								company_name: this.getNodeParameter('promoterCompanyName', 0),
-								company_number: this.getNodeParameter('promoterCompanyNumber', 0),
-								phone_number: this.getNodeParameter('promoterPhoneNumber', 0),
-								vat_id: this.getNodeParameter('promoterVatId', 0),
-								country: this.getNodeParameter('promoterCountry', 0),
-								address: this.getNodeParameter('promoterAddress', 0),
-								avatar: this.getNodeParameter('promoterAvatar', 0),
-								w8_form_url: this.getNodeParameter('promoterW8FormUrl', 0),
-								w9_form_url: this.getNodeParameter('promoterW9FormUrl', 0),
-								description: this.getNodeParameter('promoterDescription', 0),
-								instagram_url: this.getNodeParameter('promoterInstagramUrl', 0),
-								youtube_url: this.getNodeParameter('promoterYouTubeUrl', 0),
-								linkedin_url: this.getNodeParameter('promoterLinkedinUrl', 0),
-								facebook_url: this.getNodeParameter('promoterFacebookUrl', 0),
-								twitter_url: this.getNodeParameter('promoterTwitterUrl', 0),
-								twitch_url: this.getNodeParameter('promoterTwitchUrl', 0),
-								tiktok_url: this.getNodeParameter('promoterTiktokUrl', 0),
-							},
-							'profile[_destroy_w9form]': this.getNodeParameter('profile_destroy_w9form', 0, false),
-							'profile[_destroy_w8form]': this.getNodeParameter('profile_destroy_w8form', 0, false),
-						};
-						if (customFieldsUpdate) (body as IDataObject).custom_fields = customFieldsUpdate;
-					}
-					break;
-				case 'assign parent':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/assign_parent';
-						method = 'POST';
-						body = {
-							parent_promoter_id: this.getNodeParameter('parentPromoterId', 0),
-							ids: ids,
-						};
-					}
-					break;
-				case 'move promoters':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/move_to_campaign';
-						method = 'POST';
-						body = {
-							from_campaign_id: this.getNodeParameter('fromCampaignId', 0),
-							to_campaign_id: this.getNodeParameter('toCampaignId', 0),
-							ids: ids,
-							drip_emails: this.getNodeParameter('dripEmails', 0),
-							soft_move_referrals: this.getNodeParameter('softMoveReferrals', 0),
-						};
-					}
-					break;
-				case 'add promoters':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/add_to_campaign';
-						method = 'POST';
-						body = {
-							campaign_id: this.getNodeParameter('campaignId', 0),
-							ids: ids,
-							drip_emails: this.getNodeParameter('dripEmails', 0),
-						};
-					}
-					break;
-				case 'accept':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/accept';
-						method = 'POST';
-						body = {
-							campaign_id: this.getNodeParameter('campaignId', 0),
-							ids: ids,
-						};
-					}
-					break;
-				case 'reject':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/reject';
-						method = 'POST';
-						body = {
-							campaign_id: this.getNodeParameter('campaignId', 0),
-							ids: ids,
-						};
-					}
-					break;
-				case 'block':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/block';
-						method = 'POST';
-						body = {
-							campaign_id: this.getNodeParameter('campaignId', 0),
-							ids: ids,
-						};
-					}
-					break;
-				case 'archive':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/archive';
-						method = 'POST';
-						body = {
-							ids: ids,
-						};
-					}
-					break;
-				case 'restore':
-					{
-						const idsParam = this.getNodeParameter('ids', 0);
-						let ids = [];
-						if (Array.isArray(idsParam)) {
-							if (idsParam.length == 1) {
-								ids = idsParam[0].toString().split(',').map(Number);
-							} else {
-								ids = idsParam;
-							}
-						}
-						endpoint = '/company/promoters/restore';
-						method = 'POST';
-						body = {
-							ids: ids,
-						};
-					}
-					break;
-			}
-		} else if (resource === 'promo codes') {
-			switch (operation) {
-				case 'archive promo code by id':
-					{
-						endpoint = `/company/promo_codes/${this.getNodeParameter('promoCodeId', 0)}`;
-						method = 'DELETE';
-					}
-					break;
-
-				case 'create promo code':
-					{
-						endpoint = '/company/promo_codes';
-						method = 'POST';
-						body = {
-							code: this.getNodeParameter('promoCode', 0),
-							reward_id: this.getNodeParameter('rewardId', 0),
-							promoter_campaign_id: this.getNodeParameter('promoterCampaignId', 0),
-							description: this.getNodeParameter('description', 0),
-							metadata: parseJsonString(
-								this.getNodeParameter('metadata', 0, {}) as string | IDataObject,
-							),
-							details: parseJsonString(
-								this.getNodeParameter('details', 0, {}) as string | IDataObject,
-							),
-						};
-					}
-					break;
-
-				case 'get promo code by id':
-					{
-						endpoint = `/company/promo_codes/${this.getNodeParameter('promoCodeId', 0)}`;
-						method = 'GET';
-					}
-					break;
-
-				case 'get promo codes':
-					{
-						endpoint = '/company/promo_codes';
-						method = 'GET';
-					}
-					break;
-
-				case 'update promo code by id':
-					{
-						endpoint = `/company/promo_codes/${this.getNodeParameter('promoCodeId', 0)}`;
-						method = 'PUT';
-						body = {
-							code: this.getNodeParameter('promoCode', 0),
-							promoter_campaign_id: this.getNodeParameter('promoterCampaignId', 0),
-							description: this.getNodeParameter('description', 0),
-							metadata: parseJsonString(
-								this.getNodeParameter('metadata', 0, {}) as string | IDataObject,
-							),
-							details: parseJsonString(
-								this.getNodeParameter('details', 0, {}) as string | IDataObject,
-							),
-						};
-					}
-					break;
-			}
-		} else if (resource === 'custom') {
-			if (['api'].includes(operation)) {
-				const urlPath = (this.getNodeParameter('urlPath', 0) as string)?.trim() || '';
-				if (urlPath === '') {
-					throw new NodeOperationError(
-						this.getNode(),
-						`When performing a custom FirstPromoter ${operation.toUpperCase()} action, the 'URL Path' is required.`,
-					);
-				}
-			}
-
-			switch (operation) {
-				case 'api':
-					{
-						const queryStringParameters = this.getNodeParameter(
-							'queryStringParameters',
-							0,
-							{},
-						) as IDataObject;
-						if (
-							Object.keys(queryStringParameters).length > 0 &&
-							queryStringParameters.queryParameters &&
-							Array.isArray(queryStringParameters.queryParameters)
-						) {
-							for (let index = 0; index < queryStringParameters.queryParameters.length; index++) {
-								const queryParameter = queryStringParameters.queryParameters[index];
-								qs[queryParameter.parameterName] = queryParameter.parameterValue as string;
-							}
-						}
-						const headersParams = this.getNodeParameter('headersParams', 0, {}) as IDataObject;
-						if (
-							Object.keys(headersParams).length > 0 &&
-							headersParams.headerParameters &&
-							Array.isArray(headersParams.headerParameters)
-						) {
-							for (let index = 0; index < headersParams.headerParameters.length; index++) {
-								const headerParameter = headersParams.headerParameters[index];
-								headers[headerParameter.parameterName] = headerParameter.parameterValue as string;
-							}
-						}
-
-						endpoint = (this.getNodeParameter('urlPath', 0) as string).replace(
-							'https://api.firstpromoter.com/api/v2',
-							'',
-						);
-						method = (
-							this.getNodeParameter('method', 0) as string
-						).toUpperCase() as IHttpRequestMethods;
-						const bodyParam = this.getNodeParameter('body', 0, {}) as IDataObject | string;
-						body = parseJsonString(bodyParam);
-					}
-					break;
-			}
-		} else {
-			throw new NodeApiError(this.getNode(), {
-				message: `${resource} not in Firstpromoter resource list`,
-				description: 'This resource might have been added by the built-in tools',
-			});
-		}
-
-		// makking API call to FirstPromoter API
-		try {
-			const cleanBody = omitEmpty(body);
-			const cleanQs = omitEmpty(qs);
-			const response = await this.helpers.httpRequestWithAuthentication.call(
-				this,
-				'firstPromoterVersion2Api',
-				{
-					method,
-					url: `https://api.firstpromoter.com/api/v2${endpoint}`,
-					headers: { ...headers },
-					qs: Object.keys(cleanQs).length ? cleanQs : undefined,
-					body: Object.keys(cleanBody).length ? cleanBody : undefined,
-					json: true,
-				},
-			);
-
-			return [this.helpers.returnJsonArray(response.error || response)];
-		} catch (error) {
-			const message =
-				error && typeof error === 'object' && 'context' in error && 'data' in error.context
-					? String(
-							(error as { context?: { data?: { error: string } } }).context?.data?.error ||
-								(error as { context?: { data?: { error: string; message: string } } }).context?.data
-									?.message ||
-								JSON.stringify((error as { context?: { data?: object } }).context?.data) ||
-								(error as { description?: string })?.description,
-						)
-					: (error as { description?: string })?.description;
-
-			if (this.continueOnFail()) {
-				return [this.helpers.returnJsonArray({ message: message, statusCode: error.httpCode })];
-			} else {
-				if (error.httpCode === '401') {
-					throw new NodeApiError(this.getNode(), error as JsonObject, {
-						message: 'Authentication failed',
-						description:
-							'Please check your credentials and ensure you have provided the v1 (legacy) API key and try again',
-					});
-				} else {
-					throw new NodeApiError(this.getNode(), error as JsonObject, {
-						message: `FirstPromoter API request failed with error code ${error.httpCode}`,
-						description: `Failure Reason:  ${message || (error as Error).message}`,
-					});
-				}
-			}
-		}
+		return await executeRequest(this);
 	}
 }

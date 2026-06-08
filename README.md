@@ -1,159 +1,158 @@
 # n8n-nodes-firstpromoter
 
-This is an n8n community node. It lets you use **FirstPromoter** APIs in your n8n workflows.
+This is the official FirstPromoter community node for n8n that lets you start a workflow when a webhook event is received or use FirstPromoter v2 API to perform a number of [actions](#-operations-actions).
 
-**FirstPromoter** is a modern and reliable affiliate tool for subscription-based/SaaS companies that enables you to track, manage, and optimize referral-based marketing programs. It is easy to set up, yet powerful to scale with your growing needs.
+
+**[FirstPromoter](https://firstpromoter.com)** is a modern and reliable affiliate tool for subscription-based/SaaS companies that enables you to track, manage, and optimize referral-based marketing programs.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
-
-This package includes:
-
-- **FirstPromoter v2** (actions): Use this node to call the FirstPromoter v2 API (referrals, promoters, tracking, commissions, promo codes, and custom API calls).
-- **FirstPromoter Webhooks** (trigger): Use this node to receive real-time webhook events from FirstPromoter.
-- **FirstPromoter (Legacy) v1** (actions): Use only if you still rely on v1 endpoints.
 
 ---
 
 ## Table of contents
 
-- [Installation](#installation)
-- [Credentials](#credentials)
-- [Webhook setup](#webhook-setup-firstpromoter--n8n)
-- [Operations](#operations)
-- [Quick start](#quick-start-recommended-flow)
+- [Installation](#-installation) 
+- [Verify Installation](#-verify-installation)
+- [Setting Up Credentials](#-setting-up-credentials)
+- [Webhook or Trigger Setup](#-webhook-or-trigger-setup)
+- [Quick start](#-quick-start)
+- [Operations](#-operations-actions)
 - [Usage](#usage)
+- [Development](#-development)
 - [Compatibility](#compatibility)
-- [Version history](#version-history)
-- [Resources](#resources)
+- [Resources](#-resources)
 
-## Installation
+## 📦 Installation
 
-Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
+### GUI Installation
 
-## Credentials
+For self-hosted n8n instances, you can install directly via the web interface:
 
-This node supports the following FirstPromoter credentials:
+1. Open n8n in your browser
+2. Navigate to **Settings** → **Community Nodes**
+3. Click **Install a community node**
+4. Enter package name: `@firstpromoter/n8n-nodes-firstpromoter`
+5. Click **Install**
+6. Wait for installation to complete
+7. Refresh your browser
 
-- **FirstPromoter V2 API** (recommended)
-- **FirstPromoter Legacy / V1 API** (legacy)
+**Note**: This method requires owner/admin permissions and is only available for self-hosted n8n (not n8n Cloud).
 
-You’ll need to create an API key in FirstPromoter and paste it into the corresponding n8n credential.
+### n8n Cloud
 
-### How to find your FirstPromoter API key
+The FirstPromoter node requires verification to be available on n8n Cloud. n8n Cloud supports a select group of verified community nodes included in their official catalog.
 
-#### FirstPromoter V2 API key (recommended)
+>**Current Status**: Until the node is verified and included in the Cloud-available catalog, use self-hosted n8n (local or Docker) with any installation method above.
 
-1. Log in to your **FirstPromoter** dashboard.
-2. Go to **Settings → Integrations → Manage API keys**.
-3. Create a new **V2 API key** (or copy an existing one).
-4. In n8n, open the **FirstPromoter V2 API** credential and set:
-   - **Account ID**: found in FirstPromoter under **Settings → Integrations → Account ID**
-   - **API Key**: paste the V2 API key you created
+## 🔧 Verify Installation
 
-**Tip:** If you rotate keys, update the n8n credential and re-run the workflow.
+After installation and restart:
 
-#### FirstPromoter Legacy / V1 API key (legacy)
+1. Open n8n in your browser (typically `http://localhost:5678`)
+2. Create a new workflow
+3. Click the **+** button to add a node
+4. Search for **FirstPromoter** in the node picker
+5. The **FirstPromoter** node should appear in the search results
 
-1. Log in to your **FirstPromoter** dashboard.
-2. Go to **Settings → Integrations → Manage API keys**.
-3. Create or copy a **V1 (Legacy) API key** (if your account still uses v1 endpoints).
-4. In n8n, open the **FirstPromoter Legacy / V1 API** credential and paste the key.
+> If you don't see the node:
+> - Verify the npm installation completed without errors
+> - Ensure you restarted n8n after installation.
+> - Check n8n logs for any loading errors
 
 ---
 
-## Webhook setup (FirstPromoter → n8n)
+## 🔑 Setting Up Credentials
+
+Before using the [FirstPromoter](https://www.npmjs.com/package/@firstpromoter/n8n-nodes-firstpromoter)n8n node, configure your connection credentials:
+
+| Field | Required | Description |
+|  ---  |    ---   |     ---     |
+| Account ID | yes | FirstPromoter Account ID |
+| API Key | yes | v2 API key |
+
+To add credentials in n8n instance via web interface, follow the steps below:  
+1. Click the plus icon **+** on top-left
+1. Click **New Credential**
+2. Search for **FirstPromoter API**
+3. Fill in the required fields:
+		- Account ID
+		- API key
+4.Click **Save** 		
+  
+
+### Where to find your credentials on FirstPromoter
+
+1. Log in to your **FirstPromoter** dashboard.
+2. Go to **Settings → Integrations → API integration** section.
+    - Copy your **Account id**.
+3. Click **Manage API keys**
+    - Add New API key or copy existing API key
+
+> **Tip:** If you rotate keys, update the n8n credential and re-run affected workflows.
+
+---
+
+![Step 1](/screenshots/step-1-click-plus-icon.png) ![Step 2](/screenshots/step-2-new-credentials.png) ![Step 3a](/screenshots/step-3a-search.png) ![Step 3b](/screenshots/step-3b-seach-and-continue.png) ![Step 4&5](/screenshots/step-4-and-5-fill-and-save.png) ![Step 6](/screenshots/step-6-close-dialog.png)
+
+## 🔄 Webhook or Trigger Setup
+
+> **NB:** The webhook URL will be automatically registered on FirstPromoter through n8n. Therefore you do not need to add it manually.
+
+#### Endpoint details (reference)
+- **Method**: `POST`
+- **Path**: `receive` (appended to your n8n webhook base URL)
+
+#### Event type categories
+| Category | Event types |
+| --- | --- |
+| Commission |  `commission.approved`,`commission.created`,`commission.deleted`,`commission.denied`,`commission.pending`,`commission.updated`|
+| Contract Document | `contract_document.signed` |
+| Payments Batch | 	`payments_batch.completed`,`payments_batch.created`,`payments_batch.deleted`,`payments_batch.failed`,`payments_batch.initiated`,`payments_batch.processing`,`payments_batch.updated`|
+| Payout | `payout.commissions.added`,`payout.commissions.removed`,`payout.cancelled`,`payout.completed`,`payout.created`,`payout.deleted`,`payout.failed`,`payout.pending`,`payout.processing`,`payout.updated` |
+| Payout Method | `payout_method.created`, `payout_method.updated`, `payout_method.deleted` |
+| Promoter Campaign |`promoter_campaign.accepted`,`promoter_campaign.blocked`,`promoter_campaign.created`,`promoter_campaign.deleted`,`promoter_campaign.inactive`,`promoter_campaign.pending`,`promoter_campaign.rejected`,`promoter_campaign.updated`|
+| Promoter | `promoter.balance.updated`,`promoter.created`,`promoter.deleted`,`promoter.updated` |
+| Referral | `referral.cancelled`,`referral.converted`,`referral.created`,`referral.deleted`,`referral.moved`,`referral.updated` |
+
+> For more information, see [documentation](https://docs.firstpromoter.com/webhooks-v2/overview)
+---
+
+## 🚀 Quick start
 
 ### 1) Add the trigger node in n8n
 
-- Create a new workflow in n8n.
-- Add the **FirstPromoter Webhooks** node (Trigger).
-- In **Events**, select the webhook event types you want to receive.
-- **Save** the workflow.
+1. Create a new workflow in n8n
+2. Search for **FirstPromoter** node and click on it.
+3. Under Triggers, select **On new FirstPromoter event**.
+4. Select or Setup Credentials. See [Setting Up Credentials](#-setting-up-credentials).
+5. Choose **Event Type Category**. 
+   > Select **All Events** to subscribe to every category, then narrow individual events in each category as needed.
+6. Select one or more **Campaign Names or IDs**
+7. Select the specific events you want.
 
-### 2) Copy the webhook URL from n8n
+### 2) Send test a event (from FirstPromoter)
 
-- Open the **FirstPromoter Webhooks** node.
-- Copy the webhook URL shown by n8n.
-  - Use the **Test URL** while testing.
-  - Use the **Production URL** after activating the workflow.
+To send a test event, follow these steps:
 
-### 3) Configure the webhook in FirstPromoter
-
-- In FirstPromoter, go to **Settings → Integrations → Webhooks**.
-- Click **Add webhook**.
-- Paste the n8n webhook URL.
-- Select the **campaign**.
-
-- Verify it works:
-  - Click **Select event**.
-  - Select an event that matches one of the events selected in n8n.
-  - Click **Run Test**.
-  - Ensure your n8n workflow is running and listening before you click **Run Test**.
-  -In n8n, check the workflow execution: the webhook payload will appear as output from the **FirstPromoter Webhooks** node.
-- Save the webhook.
+1. Click **Test this trigger** or **Execute step** in n8n if you haven't done that yet.
+2. Go to your FirstPromoter account and navigate to **Settings** > **Integrations** > **Webhooks** section.
+3. Click the Edit icon next to your corresponding Test or Production URL in FirstPromoter.
+4. In the Test webhook section, click **Select event** and choose your desired event.
+5. Click the **Run Test** button.
 
 
-### Endpoint details (reference)
+### 3) Process the event (action node)
 
-- **Method**: `POST`
-- **Path**: `/firstpromoter`
+1. Add **FirstPromoter** action node or any action node after the trigger node.
+2. Use the webhook/trigger response payload in the action node added in step 1.
 
-### Webhook event types
-
-- `lead_signup` (Lead Signup)
-- `lead_cancelled` (Lead Cancelled)
-- `promoter_signs_up` (Promoter Signs Up)
-- `promoter_accepted` (Promoter Accepted)
-- `reward_created` (Reward Created)
-- `lead_becomes_referral` (New Customer)
-- `fulfilment_pending` (Fulfilment Pending)
-
-### Notes
-
-- For `fulfilment_pending`, you can set **Fulfilment Pending Response Code** in the node to control whether FirstPromoter keeps the fulfilment pending or marks it as fulfilled.
+> NB: All FirstPromoter actions require crendentials for their operation.
 
 ---
 
-## Operations
+## 📋 Operations (actions)
 
-### v1 operations
-
-#### Lead/Customer
-
-- Show Lead/Customer Details
-- List Leads/Customers
-- Modify Lead/Customer
-
-#### Tracking
-
-- Track Signup
-- Track Sale
-- Track Refund
-- Track Cancellation
-
-#### Reward
-
-- Create Reward
-- List Rewards
-- Update Reward
-
-#### Promoter
-
-- Create Promoter
-- List Promoters
-- Show Promoter Details and Balance
-- Modify Existing Promoter
-- Add Promoters to Campaign
-- Move Promoter to Another Campaign
-- Reset Promoter Authentication Token
-
-#### Custom
-
-- Make FirstPromoter API Call
-
-### v2 operations
-
-#### Referrals
+### Referral 
 
 - Delete Referral
 - Get Referral
@@ -161,14 +160,13 @@ You’ll need to create an API key in FirstPromoter and paste it into the corres
 - Move Referrals
 - Update Referral
 
-#### Tracking
-
+### Tracking
 - Track Signup
 - Track Sale
 - Track Refund
 - Track Cancellation
 
-#### Commissions
+### Commission
 
 - Approve Commissions
 - Create Custom Commission
@@ -179,7 +177,7 @@ You’ll need to create an API key in FirstPromoter and paste it into the corres
 - Mark Non-Monetary Commissions As Unfulfilled
 - Update Commission
 
-#### Promoters
+### Promoter
 
 - Accept Promoters
 - Add Promoters to Campaign
@@ -191,9 +189,10 @@ You’ll need to create an API key in FirstPromoter and paste it into the corres
 - List Promoters
 - Move Promoters to Campaign
 - Reject Promoters
+- Restore Promoters
 - Update Promoters
 
-#### Promo Codes
+### Promo Code
 
 - Archive Promo Code By ID
 - Create Promo Code (Stripe Only)
@@ -201,60 +200,58 @@ You’ll need to create an API key in FirstPromoter and paste it into the corres
 - Get Promo Codes
 - Update Promo Code By ID
 
-#### Custom
+### Custom API
 
-- Make Firstromoter API Call
-
----
-
-## Quick start (recommended flow)
-
-### 1) Receive an event (Webhook)
-
-1. Add **FirstPromoter Webhooks** to a new workflow.
-2. Choose the **Events** you want to listen for.
-3. Save and **Test** (or **Activate**) the workflow.
-4. Copy the webhook URL and add it in FirstPromoter:
-   - **Settings → Integrations → Webhooks**
-5. Trigger the event in FirstPromoter to confirm n8n receives the payload.
-
-### 2) Process the event (API node)
-
-1. Add **FirstPromoter v2** after the webhook node.
-2. Create a **FirstPromoter v2** credential in n8n:
-   - **Account ID**
-   - **API Key**
-3. Use the webhook payload in expressions (for example: `{{$json.event.type}}`, `{{$json.data.id}}`) to drive follow-up actions.
+- Custom FirstPromoter API Call
 
 ---
 
 ## Usage
 
-### Custom API call (Advanced)
+### Custom API call (advanced)
 
-Use **FirstPromoter v2 → Custom API** when you need an endpoint not covered by the node operations.
+Use **FirstPromoter → Custom API → Custom FirstPromoter API Call** when you need an endpoint not covered by built-in operations.
 
-- Provide:
-  - **Method** (GET/POST/PUT/DELETE)
-  - **URL Path** (example: `/company/promoters` — do not include the base URL)
-  - Optional **Query String Parameters**
-  - Optional **Headers**
-  - Optional **Body** (JSON)
-- Tip: Only set the parameters you need. Empty values are ignored.
+Provide:
+
+- **Method** (GET, POST, PUT, DELETE)
+- **URL Path** (for example `/company/promoters` — do not include the base URL `https://api.firstpromoter.com/api/v2`)
+- Optional **Query Parameters**, **Headers**, and **Body** (JSON)
+
+> Only set the parameters you need; empty values are ignored.
 
 ---
 
-## Compatibility
+## 👨‍💻 Development
 
-- **n8n**: `^2.15.1`
-- **node engine**: `>=22.22.0`
+Install from npm:
 
-## Version history
-- 0.1.0
+```bash
+npm install @firstpromoter/n8n-nodes-firstpromoter
+```
+Useful scripts:
 
-## Resources
+| Command | Description |
+| --- | --- |
+| `npm run build` | Build the package to `dist/` |
+| `npm run dev` | Run n8n with this package in development mode |
+| `npm run lint` | Lint node and credential sources |
+| `npm run lint:fix` | Lint and auto-fix where possible |
+| `npm start` | Build and start n8n with `N8N_CUSTOM_EXTENSIONS` pointing at this repo |
+
+> For more infomation how to run a node locally, see [documentation](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/)
+---
+
+##  🛠️ Compatibility
+
+- **n8n-workflow**: `>=2` (peer dependency)
+- **Node.js**: `>=22.22.0`
+
+---
+
+## 📚 Resources
 
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-- [FirstPromoter v1 documentation](https://docs.firstpromoter.com/api-reference-v1/introduction)
-- [FirstPromoter v2 documentation](https://docs.firstpromoter.com/api-reference-v2/api-admin/introduction)
-- [FirstPromoter webhooks](https://docs.firstpromoter.com/webhooks/overview)
+- [FirstPromoter v2 API documentation](https://docs.firstpromoter.com/api-reference-v2/api-admin/introduction)
+- [FirstPromoter v2 webhooks](https://docs.firstpromoter.com/webhooks-v2/overview)
+- [FirstPromoter v2 authentication](https://docs.firstpromoter.com/api-reference-v2/api-admin/authentication)

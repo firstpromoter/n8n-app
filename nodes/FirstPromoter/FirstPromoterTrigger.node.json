@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.FirstPromoter",
+	"node": "n8n-nodes-base.FirstPromoterTrigger",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Marketing & Content", "Sales", "Productivity", "Analytics"],
@@ -11,9 +11,9 @@
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://docs.firstpromoter.com/api-reference-v2/api-admin/introduction"
+				"url": "https://docs.firstpromoter.com/webhooks-v2/overview"
 			}
 		]
 	},
-	"alias": ["FirstPromoter", "FirstPromoter v2"]
+	"alias": ["FirstPromoter", "FirstPromoter Trigger"]
 }
