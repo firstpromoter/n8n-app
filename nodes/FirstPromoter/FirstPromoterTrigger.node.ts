@@ -31,6 +31,7 @@ export class FirstPromoterTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		description: 'Triggers n8n workflow when an event is recevied from FirstPromoter.',
+		subtitle: 'On new event received',
 		usableAsTool: true,
 		defaults: { name: 'FirstPromoter Trigger' },
 		inputs: [],
@@ -728,6 +729,7 @@ export class FirstPromoterTrigger implements INodeType {
 					try {
 						await deleteWebhook(this, webhookData.webhookId as number);
 					} catch (err) {
+						this.logger.warn(getErrorDescription(err));
 						return false;
 					}
 					// Remove from the static workflow data so that it is clear

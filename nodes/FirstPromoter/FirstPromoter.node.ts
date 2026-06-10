@@ -3,9 +3,11 @@ import {
 	INodeTypeDescription,
 	IExecuteFunctions,
 	NodeConnectionTypes,
+	NodeOperationError,
+	NodeApiError,
 } from 'n8n-workflow';
 
-import { executeRequest } from './GeneralFunctions';
+import { executeRequest, getErrorDescription } from './GeneralFunctions';
 
 export class FirstPromoter implements INodeType {
 	description: INodeTypeDescription = {
@@ -2068,6 +2070,22 @@ export class FirstPromoter implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions) {
-		return await executeRequest(this);
-	}
+		  try{
+				return executeRequest(this);
+			 }catch(error){
+				if (this.continueOnFail()) {
+					const message = getErrorDescription(error);
+					return [this.helpers.returnJsonArray({ message: message, statusCode: error?.httpCode })];
+				} else {
+					if (error instanceof NodeApiError && error.httpCode === '401') {
+						throw new NodeOperationError(
+							this.getNode(),
+							'Please check your credentials and ensure you have provided the v2 API key and try again.',
+						);
+					} else {
+						throw new NodeOperationError(this.getNode(), error);
+					}
+				}
+		}
+  }
 }

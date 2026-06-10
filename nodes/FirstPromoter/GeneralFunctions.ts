@@ -151,6 +151,7 @@ export const deleteWebhook = async (ref: IHookFunctions, webhookId: number) => {
 		};
 		return await ref.helpers.requestWithAuthentication.call(ref, credentialsName, options);
 	} catch (err) {
+		ref.logger.warn(err);
 		return undefined;
 	}
 };
@@ -207,7 +208,7 @@ export const executeRequest = async (ref: IExecuteFunctions): Promise<INodeExecu
 	let qs: IDataObject = {};
 	const headers: IDataObject = {};
 
-	try {
+
 		const resource = ref.getNodeParameter('resource', 0) as string;
 		const operation = ref.getNodeParameter('operation', 0) as string;
 		if (resource === 'referrals') {
@@ -781,21 +782,6 @@ export const executeRequest = async (ref: IExecuteFunctions): Promise<INodeExecu
 		});
 
 		return [ref.helpers.returnJsonArray(response)];
-	} catch (error) {
-		if (ref.continueOnFail()) {
-			const message = getErrorDescription(error);
-			return [ref.helpers.returnJsonArray({ message: message, statusCode: error.httpCode })];
-		} else {
-			if (error instanceof NodeApiError && error.httpCode === '401') {
-				throw new NodeOperationError(
-					ref.getNode(),
-					'Please check your credentials and ensure you have provided the v2 API key and try again.',
-				);
-			} else {
-				throw error;
-			}
-		}
-	}
 };
 
 export function getSelectedEventTypes(unknownEvents: unknown[]): string[] {
@@ -966,15 +952,7 @@ export function toNumberArray(value: unknown): number[] {
 }
 
 export function isSafeDigits(value: string): boolean {
-	try {
-		if (isIntegerOnly(value)) {
-			Number.parseInt(value);
-			return true;
-		}
-		return false;
-	} catch (e) {
-		return false;
-	}
+   return isIntegerOnly(value);
 }
 
 export function isIntegerOnly(str: string) {

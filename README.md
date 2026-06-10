@@ -63,7 +63,7 @@ After installation and restart:
 
 ## 🔑 Setting Up Credentials
 
-Before using the [FirstPromoter](https://www.npmjs.com/package/@firstpromoter/n8n-nodes-firstpromoter)n8n node, configure your connection credentials:
+Before using the [FirstPromoter](https://www.npmjs.com/package/@firstpromoter/n8n-nodes-firstpromoter) n8n node, configure your connection credentials:
 
 | Field | Required | Description |
 |  ---  |    ---   |     ---     |
