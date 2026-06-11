@@ -1,6 +1,6 @@
 # n8n-nodes-firstpromoter
 
-This is the official FirstPromoter community node for n8n that lets you start a workflow when a webhook event is received or use FirstPromoter v2 API to perform a number of [actions](#-operations-actions).
+This is the official FirstPromoter community node for n8n that lets you start a workflow when a webhook event is received or use FirstPromoter v2 API to perform a number of [actions](#-operations-actions). For more details, see [FirstPromoter n8n node documentation](https://docs.firstpromoter.com/automation/n8n-node).
 
 
 **[FirstPromoter](https://firstpromoter.com)** is a modern and reliable affiliate tool for subscription-based/SaaS companies that enables you to track, manage, and optimize referral-based marketing programs.
@@ -72,14 +72,13 @@ Before using the [FirstPromoter](https://www.npmjs.com/package/@firstpromoter/n8
 
 To add credentials in n8n instance via web interface, follow the steps below:  
 1. Click the plus icon **+** on top-left
-1. Click **New Credential**
-2. Search for **FirstPromoter API**
-3. Fill in the required fields:
-		- Account ID
-		- API key
-4.Click **Save** 		
+2. Click **New Credential**
+3. Search for **FirstPromoter API**
+4. Fill in the required fields:
+	 - Account ID
+	 - API key
+5. Click **Save** 		
   
-
 ### Where to find your credentials on FirstPromoter
 
 1. Log in to your **FirstPromoter** dashboard.
@@ -94,6 +93,7 @@ To add credentials in n8n instance via web interface, follow the steps below:
 
 ![Step 1](/screenshots/step-1-click-plus-icon.png) ![Step 2](/screenshots/step-2-new-credentials.png) ![Step 3a](/screenshots/step-3a-search.png) ![Step 3b](/screenshots/step-3b-seach-and-continue.png) ![Step 4&5](/screenshots/step-4-and-5-fill-and-save.png) ![Step 6](/screenshots/step-6-close-dialog.png)
 
+---
 
 ## 🔄 Webhook or Trigger Setup
 
@@ -127,7 +127,7 @@ To add credentials in n8n instance via web interface, follow the steps below:
 3. Under Triggers, select **On new FirstPromoter event**.
 4. Select or Setup Credentials. See [Setting Up Credentials](#-setting-up-credentials).
 5. Choose **Event Type Category**. 
-   > Select **All Events** to subscribe to every category, then narrow individual events in each category as needed.
+   > Select **All Categories** to subscribe to every category, then narrow individual events in each category as needed.
 6. Select one or more **Campaign Names or IDs**
 7. Select the specific events you want.
 
