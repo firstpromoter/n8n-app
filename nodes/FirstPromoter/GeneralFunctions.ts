@@ -44,8 +44,7 @@ interface ErrorData {
 export const getHeaders = async (
 	ref: IHookFunctions | ILoadOptionsFunctions,
 ): Promise<IHttpRequestOptions['headers']> => {
-	const accountId = await ref.getCredentials(credentialsName);
-	const apiKey = await ref.getCredentials(credentialsName);
+	const { accountId, apiKey } = await ref.getCredentials(credentialsName);
 	return {
 		'Account-ID': accountId,
 		Authorization: `Bearer ${apiKey}`,
@@ -152,7 +151,7 @@ export const deleteWebhook = async (ref: IHookFunctions, webhookId: number) => {
 		return await ref.helpers.requestWithAuthentication.call(ref, credentialsName, options);
 	} catch (err) {
 		ref.logger.warn(err);
-		return undefined;
+		throw err;
 	}
 };
 
@@ -786,9 +785,8 @@ export const executeRequest = async (ref: IExecuteFunctions): Promise<INodeExecu
 
 export function getSelectedEventTypes(unknownEvents: unknown[]): string[] {
 	let selectedEvents: string[] = [];
-	try {
-		const eventsParam = unknownEvents as unknown;
-		const raw = Array.isArray(eventsParam)
+	const eventsParam = unknownEvents as unknown;
+	const raw = Array.isArray(eventsParam)
 			? eventsParam
 			: eventsParam &&
 				  typeof eventsParam === 'object' &&
@@ -796,10 +794,7 @@ export function getSelectedEventTypes(unknownEvents: unknown[]): string[] {
 				  Array.isArray((eventsParam as { values: unknown[] }).values)
 				? (eventsParam as { values: unknown[] }).values
 				: [];
-		selectedEvents = raw.filter((v): v is string => typeof v === 'string');
-	} catch {
-		selectedEvents = [];
-	}
+	selectedEvents = raw.filter((v): v is string => typeof v === 'string');
 	return selectedEvents;
 }
 

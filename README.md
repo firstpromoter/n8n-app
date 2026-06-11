@@ -42,7 +42,7 @@ For self-hosted n8n instances, you can install directly via the web interface:
 
 The FirstPromoter node requires verification to be available on n8n Cloud. n8n Cloud supports a select group of verified community nodes included in their official catalog.
 
->**Current Status**: Until the node is verified and included in the Cloud-available catalog, use self-hosted n8n (local or Docker) with any installation method above.
+>**Current Status**: Until the node is verified and included in the Cloud-available catalog, use self-hosted n8n (local or Docker) with any installation methods above.
 
 ## 🔧 Verify Installation
 
@@ -93,6 +93,7 @@ To add credentials in n8n instance via web interface, follow the steps below:
 ---
 
 ![Step 1](/screenshots/step-1-click-plus-icon.png) ![Step 2](/screenshots/step-2-new-credentials.png) ![Step 3a](/screenshots/step-3a-search.png) ![Step 3b](/screenshots/step-3b-seach-and-continue.png) ![Step 4&5](/screenshots/step-4-and-5-fill-and-save.png) ![Step 6](/screenshots/step-6-close-dialog.png)
+
 
 ## 🔄 Webhook or Trigger Setup
 
@@ -252,6 +253,14 @@ Useful scripts:
 ## 📚 Resources
 
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-- [FirstPromoter v2 API documentation](https://docs.firstpromoter.com/api-reference-v2/api-admin/introduction)
-- [FirstPromoter v2 webhooks](https://docs.firstpromoter.com/webhooks-v2/overview)
+
+- [FirstPromoter n8n node documentation](https://docs.firstpromoter.com/automation/n8n-node)
+
 - [FirstPromoter v2 authentication](https://docs.firstpromoter.com/api-reference-v2/api-admin/authentication)
+
+- [FirstPromoter v2 API documentation](https://docs.firstpromoter.com/api-reference-v2/api-admin/introduction)
+
+- [FirstPromoter v2 webhooks](https://docs.firstpromoter.com/webhooks-v2/overview)
+
+
+

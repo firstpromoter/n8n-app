@@ -1,12 +1,12 @@
 {
-	"node": "n8n-nodes-base.FirstPromoterTrigger",
+	"node": "@firstpromoter/n8n-nodes-firstpromoter.FirstPromoterTrigger",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Marketing & Content", "Sales", "Productivity", "Analytics"],
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": "https://docs.firstpromoter.com/api-reference-v2/api-admin/authentication"
+				"url": "https://docs.firstpromoter.com/automation/n8n-node#-setting-up-credentials"
 			}
 		],
 		"primaryDocumentation": [

@@ -32,7 +32,6 @@ export class FirstPromoterTrigger implements INodeType {
 		version: 1,
 		description: 'Triggers n8n workflow when an event is recevied from FirstPromoter.',
 		subtitle: 'On new event received',
-		usableAsTool: true,
 		defaults: { name: 'FirstPromoter Trigger' },
 		inputs: [],
 		credentials: [{ name: 'firstPromoterApi', required: true }],
@@ -314,7 +313,7 @@ export class FirstPromoterTrigger implements INodeType {
 						name: 'Promoter Campaign Updated',
 						value: 'promoter_campaign.updated',
 						description:
-							'Triggers when a promoter’s participation in a campaign has changed (e.g., status, ref_token)',
+							'Triggers when a promoter\'s participation in a campaign has changed (e.g., status, ref_token)',
 					},
 				],
 				default: [],

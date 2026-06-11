@@ -442,7 +442,7 @@ export class FirstPromoter implements INodeType {
 				description: "Visitor's Tracking ID (tid). The _fprom_tid cookie value.",
 			},
 			{
-				displayName: 'Promoter Refferal ID',
+				displayName: 'Promoter Referral ID',
 				name: 'ref_id',
 				type: 'string',
 				default: '',
@@ -1653,7 +1653,7 @@ export class FirstPromoter implements INodeType {
 				displayOptions: {
 					show: { resource: ['api'], operation: ['call'] },
 				},
-				description: 'Request Method of the custom API call',
+				description: 'Request method of the custom API call',
 			},
 			{
 				displayName: 'Send Body',
@@ -1796,7 +1796,7 @@ export class FirstPromoter implements INodeType {
 			},
 
 			{
-				displayName: 'IDs of Commisssions',
+				displayName: 'IDs of Commissions',
 				name: 'commissionIDs',
 				type: 'string',
 				typeOptions: {
@@ -1962,7 +1962,7 @@ export class FirstPromoter implements INodeType {
 						operation: ['create commission'],
 					},
 				},
-				description: 'ID of the Referral',
+				description: 'This represents the sale amount on which a commission is generated. For zero-decimal currencies like JPY, the amount must be a whole value. For other currencies, multiply the sale amount by 100.',
 			},
 
 			{
