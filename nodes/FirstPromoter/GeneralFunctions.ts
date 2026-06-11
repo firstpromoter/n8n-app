@@ -139,6 +139,7 @@ export const createWebHook = async (
 	}
 };
 
+
 export const deleteWebhook = async (ref: IHookFunctions, webhookId: number) => {
 	try {
 		const endpoint = `${baseURL}/company/webhooks/${webhookId}`;
@@ -151,7 +152,7 @@ export const deleteWebhook = async (ref: IHookFunctions, webhookId: number) => {
 		return await ref.helpers.requestWithAuthentication.call(ref, credentialsName, options);
 	} catch (err) {
 		ref.logger.warn(err);
-		throw err;
+		throw new NodeOperationError(ref.getNode(), err);
 	}
 };
 

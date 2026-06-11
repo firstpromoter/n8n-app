@@ -20,6 +20,7 @@ import {
 	getErrorDescription,
 } from './GeneralFunctions';
 
+// eslint-disable-next-line @n8n/community-nodes/node-usable-as-tool
 export class FirstPromoterTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'FirstPromoter Trigger',
